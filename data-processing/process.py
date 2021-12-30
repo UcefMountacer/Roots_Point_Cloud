@@ -36,7 +36,14 @@ def convert_video_to_frames(path_video , FPS, output_images_path):
 
 if __name__ == '__main__':
 
-    video = 'MVI_0252.MOV'
+    # video 1
+    video = 'data/MVI_0252.MOV'
     FPS = 10
-    output_dir = 'MVI_0252'
+    output_dir = 'data/MVI_0252'
+    convert_video_to_frames(video,FPS,output_dir)
+
+    # video 2
+    video = 'data/MVI_0590.MOV'
+    FPS = 10
+    output_dir = 'data/MVI_0590'
     convert_video_to_frames(video,FPS,output_dir)
