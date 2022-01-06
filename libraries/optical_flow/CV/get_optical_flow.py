@@ -44,24 +44,5 @@ def region_of_interest(img , polygon=polygon):
 
 
 
-''' RUN '''
-
-if __name__ == "__main__":
-
-    image_dir = 'data/MVI_0590'
-    output_dir = 'optical-flow/CV/output'
-
-    im_list = sorted(os.listdir(image_dir))
-
-    for i, (im1, im2) in enumerate(zip(im_list[:-1], im_list[1:])):
-
-        im1 = cv2.imread(os.path.join(image_dir,im1))
-        im2 = cv2.imread(os.path.join(image_dir,im2))
-
-        flow = convertToOptical(im1,im2)
-        flow = region_of_interest(flow)
-        
-        plt.imsave(os.path.join(output_dir,'flow' +str(i) +'.png'),flow)
-
 
 
