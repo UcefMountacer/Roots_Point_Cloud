@@ -49,7 +49,7 @@ def region_of_interest(img , polygon=polygon):
 if __name__ == "__main__":
 
     image_dir = 'data/MVI_0590'
-    output_dir = 'optical-flow/output'
+    output_dir = 'optical-flow/CV/output'
 
     im_list = sorted(os.listdir(image_dir))
 
