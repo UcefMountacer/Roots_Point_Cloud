@@ -17,7 +17,10 @@ def extract_features(image):
     des -- list of the keypoint descriptors in an image
     """
     
+    # init ORB detector
     orb = cv2.ORB_create()
+
+    # get features using detector
     kp, des = orb.detectAndCompute(image,None)
     
     return kp, des
@@ -151,74 +154,4 @@ def mean_k(k_list, good_calib_indexes):
     return K_mean
 
 
-
-''' 
-RUN and TEST
-'''
-
-
-if __name__ == "__main__":
-
-    # directories
-    dir1 = 'MVI_0590/'
-    dir2 = 'MVI_0252/'
-    # lowe distance between matches threshold
-    filtration_threshold = 0.9
-    # rms error of calibration threshold
-    rms_threshold = 10
-    
-    # input data
-    list1 = sorted(os.listdir(dir1))
-    list2 = sorted(os.listdir(dir2))
-    K = np.zeros((3,3))
-
-    # define a list to store Ks with low RMS error
-    k_list = []
-    err_list = []
-
-
-    for i, (im1p,im2p) in enumerate(zip(list1,list2)):
-
-        print('step ', i)
-
-        im1 = cv2.imread(os.path.join('MVI_0590',im1p),0)
-        kp1, des1 = extract_features(im1)
-
-        im2 = cv2.imread(os.path.join('MVI_0252',im2p),0)
-        kp2, des2 = extract_features(im2)
-
-        _ , matches = match_features(des1, des2, filtration_threshold)
-
-        # calibration data
-
-        pattern_keys = list(kp1)
-        frames_keys=[list(kp1),list(kp2)]
-
-        frames_matches = [matches]
-
-        img_size = (im1.shape[1], im1.shape[0])
-
-        [obj_pts, image_pts] = to_calibration_data(frames_matches, pattern_keys, frames_keys, 2)
-
-        K, err = calibrate_intrinsic(obj_pts, image_pts, img_size)
-
-        print(err)
-
-        err_list.append(err)
-        k_list.append(K)
-
-
-    good_calib_indexes = []
-    for i,err in enumerate(err_list):
-
-        if err < rms_threshold:
-            good_calib_indexes.append(i)
-
-
-    K1 = mean_k(k_list, good_calib_indexes)
-    K2 = k_list[np.argmin(err_list)]
-
-    print('mean k : ',K1)
-
-    print('minimum err k :',K2)
 

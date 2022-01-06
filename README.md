@@ -24,10 +24,30 @@ this command is problematic for your case
 
 ## steps to run these fonctions (work in progress)
 
-Go to main.py
+### optical flow
 
-Specify path to video file (which should be on the data folder)
+```
+python3 main.py --op 'OF' --video path_to_video --output_video path_to_save_optical_flow_video
+```
 
-the output is automatically saved at outputs/optical_flow
+for example:
+
+```
+python3 main.py --op 'OF' --video data/MVI_0252.MOV --output_video outputs/optical_flow
+```
 
 
+### auto-calibration
+
+```
+python3 main.py --op C --v1 path_to_video1 --v2 path_to_video2 --filter_th TH1 --rms_th TH2
+```
+
+TH1 is from 0 to 1 (0.9 as an example)
+TH2 is a float, to be adjusted later when we have an idea of ground truth camera parameters
+
+for example:
+
+```
+python3 main.py --op C --v1 data/MVI_0252.MOV --v2 data/MVI_0590.MOV --filter_th 0.9 --rms_th 10.0
+```
