@@ -45,7 +45,7 @@ convert_video_to_frames(video,FPS,output_dir)
 
 ### **to generate optical flow**
 
-go to optical-flow/get_optical_flow.py
+go to optical-flow/CV/get_optical_flow.py
 
 supply these informations in the main function:
 
