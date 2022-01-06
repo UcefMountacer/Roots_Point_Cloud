@@ -10,19 +10,24 @@
 
 `conda install -c menpo opencv`
 
-`conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch`
-
 `conda install pillow`
 
 `conda install scipy`
 
 `conda install -c anaconda setuptools`
 
-`conda install -c pytorch torchvision`
+this command is problematic for your case
+
+`conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch`
+
 
 
 ## steps to run these fonctions (work in progress)
 
-### **0- extract frames from video**
+Go to main.py
+
+Specify path to video file (which should be on the data folder)
+
+the output is automatically saved at outputs/optical_flow
 
 
