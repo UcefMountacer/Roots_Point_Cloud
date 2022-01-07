@@ -151,7 +151,7 @@ if __name__ == "__main__":
 
             # append to list of Ks and list or respective errors
             err_list.append(err)
-            k_list.append(K, args.save_K)
+            k_list.append(K)
 
 
         # define a list of good indexes (with good rms error)
@@ -172,7 +172,9 @@ if __name__ == "__main__":
 
         print('K with the lowest RMS error :',K2)
 
-        save_K(K, )
+        if args.save_K:
+            
+            save_K(K, args.save_K)
 
     if operation == 'OF_R':
 

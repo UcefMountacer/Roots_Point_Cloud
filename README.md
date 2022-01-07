@@ -43,6 +43,12 @@ for example:
 ```
 python3 main.py --op C --v1 data/MVI_0252.MOV --v2 data/MVI_0590.MOV --filter_th 0.9 --rms_th 10.0
 ```
+In order to save it into a yaml file (in opencv readable form)
+
+```
+python3 main.py --op C --v1 data/MVI_0252.MOV --v2 data/MVI_0590.MOV --filter_th 0.9 --rms_th 10.0 --save_K data/calibration.yml
+```
+
 
 ### RAFT for optical flow
 
