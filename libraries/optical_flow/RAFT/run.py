@@ -43,14 +43,12 @@ def demo(args, images, list_of_outputs):
 
             flow_low, flow_up = model(image1, image2, iters=20, test_mode=True)
 
-            img = img[0].permute(1,2,0).cpu().numpy()
-            flo = flo[0].permute(1,2,0).cpu().numpy()
+            flo = flow_up[0].permute(1,2,0).cpu().numpy()
             
             # map flow to rgb image
             flo = flow_viz.flow_to_image(flo)
-            img_flo = np.concatenate([img, flo], axis=0)
 
-            final = img_flo / 255.0
+            final = flo / 255.0
 
             list_of_outputs.append(final)
 
