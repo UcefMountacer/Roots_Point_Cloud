@@ -30,7 +30,7 @@ def parse_args():
     parser.add_argument('--v2' , type=str, help="Path to video 2 of the root", default='data/MVI_0590.MOV')
     parser.add_argument('--filter_th', type=float, help = "lowe distance between matches threshold", default=0.9)
     parser.add_argument('--rms_th', type=float, help = "root mean square threshold to discard pairs with bad K", default=10.0)
-    parser.add_argument('--save_K', default = 'data/calibration.yml')
+    parser.add_argument('--save_K', default = 'outputs/calibration.yml')
 
     #if optical flow using RAFT
     parser.add_argument('--video_r', type=str, help="Path to video of the root", default='data/MVI_0252.MOV')
