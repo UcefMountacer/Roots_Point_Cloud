@@ -1,5 +1,4 @@
 
-import numpy as np
 import cv2
 import os
 
@@ -28,8 +27,8 @@ def generate_video(frames, output_dir):
     '''
    
     fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-    height, width, _ = frames[0].shape
-    video = cv2.VideoWriter(os.path.join(output_dir , 'optical_flow.MOV'), fourcc, 20, (width,height))
+    height, width= frames[0].shape[0], frames[0].shape[1]
+    video = cv2.VideoWriter(output_dir, fourcc, 20, (width,height))
 
     for frame in frames:
 

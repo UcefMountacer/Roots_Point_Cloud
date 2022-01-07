@@ -85,8 +85,8 @@ if __name__ == '__main__':
                   [0,0,1]])
 
     # directories
-    dir1 = 'data/MVI_0252'
-    dir2 = 'data/MVI_0590'
+    dir1 = '/media/youssef/ubuntu_data/WORK/Roots/MVI_0252'
+    dir2 = '/media/youssef/ubuntu_data/WORK/Roots/MVI_0590'
     rectify = 1
     
     output_dir = 'depth/output'

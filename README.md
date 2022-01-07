@@ -3,24 +3,16 @@
 
 ## install packages for conda (work in progress)
 
-
-`conda install matplotlib`
-
-`conda install numpy`
-
-`conda install -c menpo opencv`
-
-`conda install pillow`
-
-`conda install scipy`
-
-`conda install -c anaconda setuptools`
-
-this command is problematic for your case
-
-`conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch`
-
-
+Run these commands, starting with the first one that will create an venv using python 3.8 that works for opencv 4
+```
+conda create -n newenv -c conda-forge python=3.8 opencv
+conda install -c conda-forge scipy
+conda install -c anaconda setuptools=45.2.0
+conda install -c conda-forge numpy=1.19.5
+conda install -c conda-forge pillow=8.3.2
+conda install -c conda-forge matplotlib==3.4.2
+conda install pytorch torchvision torchaudio cudatoolkit=10.2 -c pytorch
+```
 
 ## steps to run these fonctions (work in progress)
 
@@ -50,4 +42,24 @@ for example:
 
 ```
 python3 main.py --op C --v1 data/MVI_0252.MOV --v2 data/MVI_0590.MOV --filter_th 0.9 --rms_th 10.0
+```
+
+### RAFT for optical flow
+
+first, you need to download pre-trained models
+
+```
+python3 main.py --op OF_R
+```
+
+Then run the command to run the model (not tested locally)
+
+```
+python3 main.py --op OF_R --video_r data/MVI_0252.MOV --output_video_r outputs/RAFT --model libraries/optical_flow/RAFT/models/raft-things.pth
+```
+
+### depth map (disparity for now)
+
+```
+python3 main.py --op D --v1 data/MVI_0252.MOV --v2 data/MVI_0590.MOV --output_video_depth outputs/depth
 ```
