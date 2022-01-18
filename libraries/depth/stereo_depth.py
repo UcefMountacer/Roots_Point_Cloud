@@ -23,12 +23,13 @@ def depth_map(left, right):
     # kernel_size = 7*3
     # left = cv2.GaussianBlur(left, (kernel_size,kernel_size), sigmaX=5, sigmaY=5)
     # right = cv2.GaussianBlur(right, (kernel_size, kernel_size), sigmaX=2, sigmaY=2)
-    
+    minDisparity = 0
+    numDisparities = 16*50
 
     stereo = cv2.StereoSGBM_create(
-        numDisparities=16*50,  
+        numDisparities=numDisparities,  
         blockSize=2,
-        minDisparity=0)
+        minDisparity=minDisparity)
         
     right_matcher = cv2.ximgproc.createRightMatcher(stereo)
 
@@ -51,7 +52,15 @@ def depth_map(left, right):
 
     filteredImg = wls_filter.filter(displ, left, disparity_map_right=dispr)
 
-    return filteredImg
+    # solving opencv problem
+
+    disparity_scaled = (filteredImg - minDisparity) / numDisparities
+    disparity_scaled += abs(np.amin(disparity_scaled))
+    disparity_scaled /= np.amax(disparity_scaled)
+    disparity_scaled[disparity_scaled < 0] = 0
+    d = np.array(255 * disparity_scaled, np.uint8) 
+
+    return d
 
 
 def run_on_stereo(left , right, rectify=0, K=None):
@@ -94,7 +103,7 @@ def run_on_stereo(left , right, rectify=0, K=None):
 
 
 ''' test '''
-
+'''
 
 def read_video(video_file_path):
 
@@ -120,7 +129,7 @@ if __name__ == '__main__':
     rectify = 0
     
     output_dir = 'depth/output'
-    # input data
+    # input data+
     list1 = read_video(v1)
     list2 = read_video(v2)
 
@@ -131,15 +140,19 @@ if __name__ == '__main__':
 
         disparity = run_on_stereo(im1 , im2)    
 
-        # disparity = np.array(disparity, dtype=np.float64)
+        # np.save('disp.npy',disparity)
 
-        # disparity = cv2.cvtColor(disparity,cv2.COLOR_GRAY2BGR)
+        disparity_scaled = (disparity - 0) / 16*50
+        disparity_scaled += abs(np.amin(disparity_scaled))
+        disparity_scaled /= np.amax(disparity_scaled)
+        disparity_scaled[disparity_scaled < 0] = 0
+        d = np.array(255 * disparity_scaled, np.uint8) 
 
-        np.save('disp.npy',disparity)
+        print(d)
 
 
 
-
+'''
 
 
 

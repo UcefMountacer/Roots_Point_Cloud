@@ -175,6 +175,7 @@ if __name__ == "__main__":
         print('running disparity')
         
         output_dir = args.output_video_depth
+        
         # input data
         list1 = read_video(args.v1)
         list2 = read_video(args.v2)
