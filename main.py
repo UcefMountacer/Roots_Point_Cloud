@@ -7,6 +7,7 @@ from libraries.data_processing.process import *
 from libraries.optical_flow.CV.get_optical_flow import *
 from libraries.auto_calibration.calibration_ORB_features import *
 from libraries.optical_flow.RAFT.run import *
+from libraries.depth.stereo_depth import *
 
 
 description = """ Run optical flow from a video and generate output video"""
@@ -126,11 +127,8 @@ if __name__ == "__main__":
 
             pattern_keys = list(kp1)
             frames_keys=[list(kp1),list(kp2)]
-
             frames_matches = [matches]
-
             img_size = (im1.shape[1], im1.shape[0])
-
             [obj_pts, image_pts] = to_calibration_data(frames_matches, pattern_keys, frames_keys, 2)
 
 
@@ -165,9 +163,7 @@ if __name__ == "__main__":
         if args.save_K:
             
             save_path = os.path.join(args.save_K , 'calibration_ORB.yml')
-            save_K(K, args.save_K)
-
-
+            save_K(K, save_path)
 
     if operation == 'D':
 
@@ -187,15 +183,11 @@ if __name__ == "__main__":
 
         for i, (im1,im2) in enumerate(zip(list1,list2)):
 
-            print('pair number :', i)
+            print('stereo pair number :', i)
 
             disp = np.zeros(im1.shape)
 
-            im1 = cv2.cvtColor(im1, cv2.COLOR_BGR2GRAY)
-            im2 = cv2.cvtColor(im2, cv2.COLOR_BGR2GRAY)
-
-            stereo = cv2.StereoBM_create(numDisparities=16, blockSize=15)
-            disparity = stereo.compute(im1,im2)
+            disparity = run_on_stereo(im1 , im2)
 
             disparity = np.array(disparity, dtype=np.uint8)
 
@@ -204,4 +196,4 @@ if __name__ == "__main__":
             depth_list.append(d)
 
 
-        generate_video(depth_list, os.path.join(output_dir , 'disparity.MOV')) 
+        generate_video(depth_list, os.path.join(output_dir , 'disparity2.MOV')) 
