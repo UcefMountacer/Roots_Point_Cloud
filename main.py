@@ -185,8 +185,6 @@ if __name__ == "__main__":
 
             print('stereo pair number :', i)
 
-            disp = np.zeros(im1.shape)
-
             disparity = run_on_stereo(im1 , im2)
 
             disparity = np.array(disparity, dtype=np.uint8)

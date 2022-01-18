@@ -44,6 +44,8 @@ def depth_map(left, right):
     wls_filter.setLambda(lmbda)
 
     wls_filter.setSigmaColor(sigma)
+
+    ''' The cutting problem occurs here '''
     displ = stereo.compute(left, right)  
     dispr = right_matcher.compute(right, left)  
 
@@ -88,9 +90,12 @@ def run_on_stereo(left , right, rectify=0, K=None):
     return disp
 
 
+
+
+
 ''' test '''
 
-'''
+
 def read_video(video_file_path):
 
     list_of_frames = []
@@ -126,14 +131,12 @@ if __name__ == '__main__':
 
         disparity = run_on_stereo(im1 , im2)    
 
-        disparity = np.float16(disparity)
+        # disparity = np.array(disparity, dtype=np.float64)
 
-        disparity = cv2.cvtColor(disparity, cv2.COLOR_RGB2BGR)
+        # disparity = cv2.cvtColor(disparity,cv2.COLOR_GRAY2BGR)
 
-        cv2.imwrite('disp' +str(i) +'.jpeg',disparity)
+        np.save('disp.npy',disparity)
 
-
-'''
 
 
 
