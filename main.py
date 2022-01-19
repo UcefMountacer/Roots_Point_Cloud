@@ -34,6 +34,8 @@ def parse_args():
 
     # if depth
     parser.add_argument('--output_video_depth' , type=str, help="Path to save output video of optical flow", default='outputs/depth')
+    parser.add_argument('--baseline' , type=float, help="baseline of stereo rig in mm", default=100)
+    parser.add_argument('--opd' , type=bool, help="save npy (0) or visualize disparity in a video (1)", default=1)
 
     return parser.parse_args()
 
@@ -175,24 +177,51 @@ if __name__ == "__main__":
         print('running disparity')
         
         output_dir = args.output_video_depth
-        
         # input data
         list1 = read_video(args.v1)
         list2 = read_video(args.v2)
 
         depth_list = []
 
-        for i, (im1,im2) in enumerate(zip(list1,list2)):
+        # initialize methods
 
-            print('stereo pair number :', i)
+        methods = init_stereo_method()
 
-            disparity = run_on_stereo(im1 , im2)
+        # load parameters (K for now)
 
-            disparity = np.array(disparity, dtype=np.uint8)
+        
 
-            d = cv2.cvtColor(disparity,cv2.COLOR_GRAY2BGR)
+        # operation
 
-            depth_list.append(d)
+        op_depth = args.opd
+
+        if op_depth == 1:
+
+            # show disparity
+
+            for i, (im1,im2) in enumerate(zip(list1,list2)):
+
+                print('stereo pair number :', i)
+
+                disparity = run_on_stereo(im1 , im2, methods)
+
+                # disparity = np.array(disparity, dtype=np.uint8)
+
+                d = cv2.cvtColor(disparity,cv2.COLOR_GRAY2BGR)
+
+                depth_list.append(d)
 
 
-        generate_video(depth_list, os.path.join(output_dir , 'disparity2.MOV')) 
+            generate_video(depth_list, os.path.join(output_dir , 'disparity.MOV')) 
+
+        if op_depth == 0:
+
+            # save depth (TO DO)
+
+            K = load_params(path= 'outputs/calibration_ORB_full.yml')
+
+            fx = K[0][0]
+            b = args.baseline
+            parameters = fx, b
+
+            pass

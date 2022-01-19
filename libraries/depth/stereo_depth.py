@@ -13,38 +13,82 @@ import matplotlib.pyplot as plt
     OUT : disparity map
 '''
 
+def load_params(path):
+
+    '''
+    Loads camera matrix and distortion coefficients
+    '''
+    cv_file = cv2.FileStorage(path, cv2.FILE_STORAGE_READ)
+
+    camera_matrix = cv_file.getNode("K").mat()
+    cv_file.release()
+
+    return camera_matrix
 
 
-def depth_map(left, right):
+def init_stereo_method(minDisparity = 0 , numDisparities = 16*30, blockSize = 1, lmbda = 30000, sigma = 2):
+
     '''
-    Depth map calculation
+    initialize stereo matchers nd filters
     '''
-    
-    # kernel_size = 7*3
-    # left = cv2.GaussianBlur(left, (kernel_size,kernel_size), sigmaX=5, sigmaY=5)
-    # right = cv2.GaussianBlur(right, (kernel_size, kernel_size), sigmaX=2, sigmaY=2)
-    minDisparity = 0
-    numDisparities = 16*50
 
     stereo = cv2.StereoSGBM_create(
-        numDisparities=numDisparities,  
-        blockSize=2,
-        minDisparity=minDisparity)
-        
+                        numDisparities=numDisparities,  
+                        blockSize=blockSize,
+                        minDisparity=minDisparity,
+                        disp12MaxDiff=1,
+                        uniquenessRatio=10,
+                        speckleWindowSize=150,
+                        speckleRange=32)
+
     right_matcher = cv2.ximgproc.createRightMatcher(stereo)
-
-    # stereo = cv2.StereoBM_create(numDisparities=32, blockSize=15)
-    # right_matcher = cv2.ximgproc.createRightMatcher(stereo)
-
-
-    # FILTER Parameters
-    lmbda = 8000
-    sigma = 1.3
 
     wls_filter = cv2.ximgproc.createDisparityWLSFilter(matcher_left=stereo)
     wls_filter.setLambda(lmbda)
-
     wls_filter.setSigmaColor(sigma)
+
+    return stereo, right_matcher, wls_filter, minDisparity, numDisparities
+
+
+def scale_disparity(disp, methods):
+
+    '''
+    scale diqparity for opencv format (vizualisation purpose only)
+    '''
+
+    _, _, _, minDisparity, numDisparities = methods
+
+    disparity_scaled = (disp - minDisparity) / numDisparities
+    disparity_scaled += abs(np.amin(disparity_scaled))
+    disparity_scaled /= np.amax(disparity_scaled)
+    disparity_scaled[disparity_scaled < 0] = 0
+
+    d = np.array(255 * disparity_scaled, np.uint8) 
+
+    return d
+
+
+def disp_2_depth(disp_scaled , parameters):
+
+    '''
+    depth = baseline * focal / disparity
+    '''
+
+    f,b = parameters
+
+
+    return
+
+
+
+
+def depth_map(left, right, methods):
+
+    '''
+    Depth map calculation
+    '''
+
+    stereo, right_matcher, wls_filter, minDisparity, numDisparities = methods
 
     ''' The cutting problem occurs here '''
     displ = stereo.compute(left, right)  
@@ -54,16 +98,12 @@ def depth_map(left, right):
 
     # solving opencv problem
 
-    disparity_scaled = (filteredImg - minDisparity) / numDisparities
-    disparity_scaled += abs(np.amin(disparity_scaled))
-    disparity_scaled /= np.amax(disparity_scaled)
-    disparity_scaled[disparity_scaled < 0] = 0
-    d = np.array(255 * disparity_scaled, np.uint8) 
+    d = scale_disparity(filteredImg , methods)
 
     return d
 
 
-def run_on_stereo(left , right, rectify=0, K=None):
+def run_on_stereo(left , right, methods, rectify=0, K=None):
 
     '''
     run code
@@ -94,7 +134,7 @@ def run_on_stereo(left , right, rectify=0, K=None):
         gray_left = cv2.cvtColor(left, cv2.COLOR_BGR2GRAY)
         gray_right = cv2.cvtColor(right, cv2.COLOR_BGR2GRAY)
 
-        disp = depth_map(gray_left, gray_right) 
+        disp = depth_map(gray_left, gray_right, methods) 
 
     return disp
 
@@ -103,8 +143,8 @@ def run_on_stereo(left , right, rectify=0, K=None):
 
 
 ''' test '''
-'''
 
+'''
 def read_video(video_file_path):
 
     list_of_frames = []
@@ -140,19 +180,12 @@ if __name__ == '__main__':
 
         disparity = run_on_stereo(im1 , im2)    
 
-        # np.save('disp.npy',disparity)
-
-        disparity_scaled = (disparity - 0) / 16*50
-        disparity_scaled += abs(np.amin(disparity_scaled))
-        disparity_scaled /= np.amax(disparity_scaled)
-        disparity_scaled[disparity_scaled < 0] = 0
-        d = np.array(255 * disparity_scaled, np.uint8) 
-
-        print(d)
-
+        np.save('disp.npy',disparity)
 
 
 '''
+
+
 
 
 
