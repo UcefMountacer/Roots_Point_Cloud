@@ -199,14 +199,14 @@ if __name__ == "__main__":
 
                 print('stereo pair number :', i)
 
+                # get dsiparity, depth and image of depth for vizualisation
                 depth, depth_viz, disp = run_on_stereo(im1 , im2, methods,base=100, focal=730, max_depth= 500 , min_depth = 0)
+                
+                # combine disparity and depth for analysis in one video
+                combined_image = np.hstack((disp, depth_viz))
 
-                disp = cv2.cvtColor(disp,cv2.COLOR_GRAY2BGR)
-                depth_viz = cv2.cvtColor(depth_viz,cv2.COLOR_GRAY2BGR)
-
-                cobined_image = np.hstack((disp, depth_viz))
-
-                images_list.append(cobined_image)
+                # append to image list for video generation
+                images_list.append(combined_image)
 
             generate_video(images_list, os.path.join(output_dir , 'combined.MOV')) 
 

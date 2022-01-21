@@ -130,6 +130,10 @@ def run_on_stereo(left , right, methods, base, focal, max_depth= 500 , min_depth
     # depth_viz is what will be shown using opencv (video)
     depth, depth_viz = scale_depth(depth, min_depth, max_depth)
 
+    # for opencv visualization
+    disp = cv2.cvtColor(disp,cv2.COLOR_GRAY2BGR)
+    depth_viz = cv2.cvtColor(depth_viz,cv2.COLOR_GRAY2BGR)
+
 
     return depth, depth_viz, disp
 
