@@ -174,22 +174,18 @@ if __name__ == "__main__":
             os.mkdir(args.output_video_depth)
             print('output directory created')
 
-        print('running disparity')
+        print('running disparity and depth')
         
         output_dir = args.output_video_depth
         # input data
-        list1 = read_video(args.v1)
-        list2 = read_video(args.v2)
+        list1 = read_video(args.v1)[:10]
+        list2 = read_video(args.v2)[:10]
 
-        depth_list = []
+        images_list = []
 
         # initialize methods
 
         methods = init_stereo_method()
-
-        # load parameters (K for now)
-
-        
 
         # operation
 
@@ -203,22 +199,22 @@ if __name__ == "__main__":
 
                 print('stereo pair number :', i)
 
-                disparity = run_on_stereo(im1 , im2, methods)
+                depth, depth_viz, disp = run_on_stereo(im1 , im2, methods,base=100, focal=730, max_depth= 500 , min_depth = 0)
 
-                # disparity = np.array(disparity, dtype=np.uint8)
+                disp = cv2.cvtColor(disp,cv2.COLOR_GRAY2BGR)
+                depth_viz = cv2.cvtColor(depth_viz,cv2.COLOR_GRAY2BGR)
 
-                d = cv2.cvtColor(disparity,cv2.COLOR_GRAY2BGR)
+                cobined_image = np.hstack((disp, depth_viz))
 
-                depth_list.append(d)
+                images_list.append(cobined_image)
 
-
-            generate_video(depth_list, os.path.join(output_dir , 'disparity.MOV')) 
+            generate_video(images_list, os.path.join(output_dir , 'combined.MOV')) 
 
         if op_depth == 0:
 
             # save depth (TO DO)
 
-            K = load_params(path= 'outputs/calibration_ORB_full.yml')
+            K = load_params(path= 'outputs/calibration.yml')
 
             fx = K[0][0]
             b = args.baseline

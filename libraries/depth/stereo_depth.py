@@ -8,16 +8,13 @@ import matplotlib.pyplot as plt
 ###############
 
 
-'''
-    IN : stereo frame
-    OUT : disparity map
-'''
 
 def load_params(path):
 
     '''
     Loads camera matrix and distortion coefficients
     '''
+
     cv_file = cv2.FileStorage(path, cv2.FILE_STORAGE_READ)
 
     camera_matrix = cv_file.getNode("K").mat()
@@ -53,176 +50,161 @@ def init_stereo_method(minDisparity = 0 , numDisparities = 16*30, blockSize = 1,
 def scale_disparity(disp, methods):
 
     '''
-    scale diqparity for opencv format (vizualisation purpose only)
+    scale diqparity for opencv format
     '''
 
     _, _, _, minDisparity, numDisparities = methods
 
-    disparity_scaled = (disp - minDisparity) / numDisparities
-    disparity_scaled += abs(np.amin(disparity_scaled))
-    disparity_scaled /= np.amax(disparity_scaled)
-    disparity_scaled[disparity_scaled < 0] = 0
+    
+    disp = (disp - minDisparity) / numDisparities
+    disp += abs(np.amin(disp))
+    disp /= np.amax(disp)
+    disp[disp < 0] = 0
 
-    d = np.array(255 * disparity_scaled, np.uint8) 
+    d = np.array(255 * disp, np.uint8) 
+    d[d < 1] = 1
 
     return d
 
 
-def disp_2_depth(disp_scaled , parameters):
+def scale_depth(depth, min, max):
+
+    '''
+    scale depth for opencv format
+    '''
+
+    depth[depth > max] = max
+    depth[depth < min] = min
+
+    depth_viz = (depth - min) / max
+    depth_viz += abs(np.amin(depth_viz))
+    depth_viz /= np.amax(depth_viz)
+    depth_viz[depth_viz < 0] = 0
+
+    depth_viz = np.array(255 * depth_viz, np.uint8) 
+
+    return depth, depth_viz
+
+
+def disp_2_depth(disp, b, f):
 
     '''
     depth = baseline * focal / disparity
     '''
 
-    f,b = parameters
+    return b * f / disp
 
 
-    return
-
-
-
-
-def depth_map(left, right, methods):
+def run_on_stereo(left , right, methods, base, focal, max_depth= 500 , min_depth = 0.1):
 
     '''
-    Depth map calculation
+    run stereo vision
     '''
+            
+    # convert to grascale before calculating depth
 
-    stereo, right_matcher, wls_filter, minDisparity, numDisparities = methods
+    left = cv2.cvtColor(left, cv2.COLOR_BGR2GRAY)
+    right = cv2.cvtColor(right, cv2.COLOR_BGR2GRAY)
 
+    # get functions from initializer
+    stereo, right_matcher, wls_filter, _, _ = methods
+
+    # compute stereo vision in respect to left and right image
     ''' The cutting problem occurs here '''
     displ = stereo.compute(left, right)  
     dispr = right_matcher.compute(right, left)  
 
-    filteredImg = wls_filter.filter(displ, left, disparity_map_right=dispr)
+    # apply filter using bth 
+    disp = wls_filter.filter(displ, left, disparity_map_right=dispr)
 
     # solving opencv problem
+    # using disparity to get depth without this scaling yields bad results
+    disp = scale_disparity(disp , methods)
 
-    d = scale_disparity(filteredImg , methods)
+    # use scaled disparity to get depth
+    depth = disp_2_depth(disp, base, focal)
 
-    return d
-
-
-def run_on_stereo(left , right, methods, rectify=0, K=None):
-
-    '''
-    run code
-    '''
-
-    if rectify:
-
-        # not working for now, may ba useful
+    # scale depth for vizualisation and saving
+    # pure depth has some inf values that need to be truncated
+    # depth is to be used for 3d reconstruction
+    # depth_viz is what will be shown using opencv (video)
+    depth, depth_viz = scale_depth(depth, min_depth, max_depth)
 
 
-        height, width, channel = left.shape  # We will use the shape for remap
-
-        # Undistortion and Rectification part!
-        leftMapX, leftMapY = cv2.initUndistortRectifyMap(K, None, None, None, (width, height), cv2.CV_32FC1)
-        left_rectified = cv2.remap(left, leftMapX, leftMapY, cv2.INTER_LINEAR, cv2.BORDER_CONSTANT)
-        rightMapX, rightMapY = cv2.initUndistortRectifyMap(K, None, None, None, (width, height), cv2.CV_32FC1)
-        right_rectified = cv2.remap(right, rightMapX, rightMapY, cv2.INTER_LINEAR, cv2.BORDER_CONSTANT)
-
-        gray_left = cv2.cvtColor(left_rectified, cv2.COLOR_BGR2GRAY)
-        gray_right = cv2.cvtColor(right_rectified, cv2.COLOR_BGR2GRAY)
-
-        disp = depth_map(gray_left, gray_right) 
-
-    if not rectify:
-
-        # what we are using now
-            
-        gray_left = cv2.cvtColor(left, cv2.COLOR_BGR2GRAY)
-        gray_right = cv2.cvtColor(right, cv2.COLOR_BGR2GRAY)
-
-        disp = depth_map(gray_left, gray_right, methods) 
-
-    return disp
+    return depth, depth_viz, disp
 
 
 
 
 
-''' test '''
-
-'''
-def read_video(video_file_path):
-
-    list_of_frames = []
-    vidcap = cv2.VideoCapture(video_file_path)
-
-    success,image = vidcap.read()
-
-    while success:
-        list_of_frames.append(image)
-        success,image = vidcap.read()
-
-    return list_of_frames
 
 
+# def generate_video(frames, output_dir):
 
-if __name__ == '__main__':
+#     '''
+#     generate and save a video from a list of frames
+#     '''
+   
+#     fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+#     height, width= frames[0].shape[0], frames[0].shape[1]
+#     video = cv2.VideoWriter(output_dir, fourcc, 20, (width,height))
+
+#     for frame in frames:
+
+#         video.write(frame)
+
+#     cv2.destroyAllWindows()
+#     video.release()
 
 
-    # directories
-    v1 = 'data/MVI_0252.MOV'
-    v2 = 'data/MVI_0590.MOV'
-    rectify = 0
+
+# def read_video(video_file_path):
+
+#     list_of_frames = []
+#     vidcap = cv2.VideoCapture(video_file_path)
+
+#     success,image = vidcap.read()
+
+#     while success:
+#         list_of_frames.append(image)
+#         success,image = vidcap.read()
+
+#     return list_of_frames
+
+
+
+# if __name__ == '__main__':
+
+
+#     # directories
+#     v1 = 'data/1/MVI_0252.MOV'
+#     v2 = 'data/1/MVI_0590.MOV'
     
-    output_dir = 'depth/output'
-    # input data+
-    list1 = read_video(v1)
-    list2 = read_video(v2)
+#     output_dir = 'libraries/depth/output'
+#     # input data+
+#     list1 = read_video(v1)[:5]
+#     list2 = read_video(v2)[:5]
 
-    for i, (im1,im2) in enumerate(zip(list1,list2)):
+#     methods = init_stereo_method()
 
-        print('step ', i)
+#     depth_list = []
 
+#     for i, (im1,im2) in enumerate(zip(list1,list2)):
 
-        disparity = run_on_stereo(im1 , im2)    
-
-        np.save('disp.npy',disparity)
-
-
-'''
+#         print('step ', i)
 
 
+#         depth, depth_viz, disp = run_on_stereo(im1 , im2, methods,base=100, focal=730, max_depth= 500 , min_depth = 0)    
+
+#         # disp = cv2.cvtColor(disp,cv2.COLOR_GRAY2BGR)
+#         depth_viz = cv2.cvtColor(depth_viz,cv2.COLOR_GRAY2BGR)
+
+#         depth_list.append(depth_viz)
+    
+#     generate_video(depth_list, '/media/youssef/ubuntu_data/WORK/Roots_Point_Cloud/outputs/depth/depth.MOV')
 
 
 
 
-'''
-for R
 
- # kp1, des1 = extract_features(im1)
-        # kp2, des2 = extract_features(im2)
 
-        # # get matches between a pair of frames
-        # _ , matches = match_features(des1, des2, filtration_threshold)
-
-        # image1_points = []
-        # image2_points = []
-
-        # for m in mtch:
-        #     m = m[0]
-        #     query_idx = m.queryIdx
-        #     train_idx = m.trainIdx
-
-        #     # get first img matched keypoints
-        #     p1_x, p1_y = kp1[query_idx].pt
-        #     image2_points.append([p1_x, p1_y])
-
-        #     # get second img matched keypoints
-        #     p2_x, p2_y = kp2[train_idx].pt
-        #     image1_points.append([p2_x, p2_y])
-
-        # E, mask = cv2.findEssentialMat(np.array(image1_points), np.array(image2_points), K)
-        # _, R, t, mask = cv2.recoverPose(E, np.array(image1_points), np.array(image2_points), K)
- 
-
-        # kernel_size = 7
-        # im1 = cv2.GaussianBlur(im1, (kernel_size,kernel_size), 1.5)
-        # im2 = cv2.GaussianBlur(im2, (kernel_size, kernel_size), 1.5)
-
-        # stereo = cv2.StereoBM_create(numDisparities=16, blockSize=15)
-        # disparity = stereo.compute(im1,im2)
-'''
