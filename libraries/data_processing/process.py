@@ -1,6 +1,7 @@
 
 import cv2
 import os
+import numpy as np
 
 def read_video(video_file_path):
 
@@ -36,6 +37,23 @@ def generate_video(frames, output_dir):
 
     cv2.destroyAllWindows()
     video.release()
+
+
+def segment_background(im):
+
+    '''
+    remove background using color segmentation
+    '''
+
+    lower = np.array([180, 48, 35])
+    upper = np.array([245, 145, 128])
+    thresh = cv2.inRange(im, lower, upper)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (20,20))
+    morph = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+    mask = 255 - morph
+    result = cv2.bitwise_and(im, im, mask=mask)
+
+    return result
 
 
 

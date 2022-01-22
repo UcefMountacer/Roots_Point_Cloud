@@ -143,37 +143,54 @@ def run_on_stereo(left , right, methods, base, focal, max_depth= 500 , min_depth
 
 
 
-# def generate_video(frames, output_dir):
+def generate_video(frames, output_dir):
 
-#     '''
-#     generate and save a video from a list of frames
-#     '''
+    '''
+    generate and save a video from a list of frames
+    '''
    
-#     fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
-#     height, width= frames[0].shape[0], frames[0].shape[1]
-#     video = cv2.VideoWriter(output_dir, fourcc, 20, (width,height))
+    fourcc = cv2.VideoWriter_fourcc('m', 'p', '4', 'v')
+    height, width= frames[0].shape[0], frames[0].shape[1]
+    video = cv2.VideoWriter(output_dir, fourcc, 20, (width,height))
 
-#     for frame in frames:
+    for frame in frames:
 
-#         video.write(frame)
+        video.write(frame)
 
-#     cv2.destroyAllWindows()
-#     video.release()
+    cv2.destroyAllWindows()
+    video.release()
 
 
 
-# def read_video(video_file_path):
+def read_video(video_file_path):
 
-#     list_of_frames = []
-#     vidcap = cv2.VideoCapture(video_file_path)
+    list_of_frames = []
+    vidcap = cv2.VideoCapture(video_file_path)
 
-#     success,image = vidcap.read()
+    success,image = vidcap.read()
 
-#     while success:
-#         list_of_frames.append(image)
-#         success,image = vidcap.read()
+    while success:
+        list_of_frames.append(image)
+        success,image = vidcap.read()
 
-#     return list_of_frames
+    return list_of_frames
+
+
+def segment_background(im1,im):
+
+    '''
+    remove background using color segmentation
+    '''
+
+    lower = np.array([180, 48, 35])
+    upper = np.array([245, 145, 128])
+    thresh = cv2.inRange(im1, lower, upper)
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (20,20))
+    morph = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
+    mask = 255 - morph
+    result = cv2.bitwise_and(im, im, mask=mask)
+
+    return result
 
 
 
@@ -181,13 +198,13 @@ def run_on_stereo(left , right, methods, base, focal, max_depth= 500 , min_depth
 
 
 #     # directories
-#     v1 = 'data/1/MVI_0252.MOV'
-#     v2 = 'data/1/MVI_0590.MOV'
+#     v1 = 'data/43/MVI_0252.MOV'
+#     v2 = 'data/43/MVI_0590.MOV'
     
 #     output_dir = 'libraries/depth/output'
 #     # input data+
-#     list1 = read_video(v1)[:5]
-#     list2 = read_video(v2)[:5]
+#     list1 = read_video(v1)
+#     list2 = read_video(v2)
 
 #     methods = init_stereo_method()
 
@@ -197,15 +214,13 @@ def run_on_stereo(left , right, methods, base, focal, max_depth= 500 , min_depth
 
 #         print('step ', i)
 
-
 #         depth, depth_viz, disp = run_on_stereo(im1 , im2, methods,base=100, focal=730, max_depth= 500 , min_depth = 0)    
 
-#         # disp = cv2.cvtColor(disp,cv2.COLOR_GRAY2BGR)
-#         depth_viz = cv2.cvtColor(depth_viz,cv2.COLOR_GRAY2BGR)
+#         depth_viz = segment_background(im1, depth_viz)
 
 #         depth_list.append(depth_viz)
     
-#     generate_video(depth_list, '/media/youssef/ubuntu_data/WORK/Roots_Point_Cloud/outputs/depth/depth.MOV')
+#     generate_video(depth_list, '/media/youssef/ubuntu_data/WORK/Roots_Point_Cloud/outputs/depth/depth_cut.MOV')
 
 
 
