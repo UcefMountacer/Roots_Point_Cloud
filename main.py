@@ -152,14 +152,14 @@ if __name__ == "__main__":
 
 
         # get mean of all good Ks
-        K1 = mean_k(k_list, good_calib_indexes)
+        # K1 = mean_k(k_list, good_calib_indexes)
 
         # get K with minimal error
-        K2 = k_list[np.argmin(err_list)]
+        K = k_list[np.argmin(err_list)]
 
-        print('K obtained with calculating mean of K with low RMS error: ',K1)
+        # print('K obtained with calculating mean of K with low RMS error: ',K1)
 
-        print('K with the lowest RMS error :',K2)
+        print('K with the lowest RMS error :',K)
 
         if args.save_K:
             
