@@ -153,14 +153,14 @@ def mean_k(k_list, good_calib_indexes):
     return K_mean
 
 
-def save_K(K,file_path):
+def save_K(K, file_path):
 
     '''
     Save the camera matrix and the distortion coefficients to given path/file.
     '''
 
     cv_file = cv2.FileStorage(file_path, cv2.FILE_STORAGE_WRITE)
-    # cv_file.write("K", K)
+    cv_file.write("K", K)
     # cv_file.write("D", D)
     # cv_file.write("R", R[0])
     # cv_file.write("t", t[0])
