@@ -6,7 +6,6 @@ from argparse import ArgumentParser
 from libraries.data_processing.process import *
 from libraries.optical_flow.CV.get_optical_flow import *
 from libraries.auto_calibration.calibration_ORB_features import *
-from libraries.optical_flow.RAFT.run import *
 from libraries.depth.stereo_depth import *
 
 
@@ -135,7 +134,7 @@ if __name__ == "__main__":
 
 
             # get K matrix and error
-            K, err = calibrate_intrinsic(obj_pts, image_pts, img_size)
+            K, err, _, _, _ = calibrate_intrinsic(obj_pts, image_pts, img_size)
 
             print('pair number :', i, 'with error :',err)
 

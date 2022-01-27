@@ -21,26 +21,9 @@ def convertToOptical(prev_image, curr_image):
     hsv[...,2] = cv2.normalize(mag, None, 0, 255, cv2.NORM_MINMAX)
     flow_image_bgr = cv2.cvtColor(hsv, cv2.COLOR_HSV2BGR)
 
-    return flow_image_bgr
+    flow_mask = cv2.cvtColor(flow_image_bgr , cv2.COLOR_BGR2GRAY)
 
+    mask = cv2.threshold(flow_mask, 0, 255, cv2.THRESH_BINARY)[1]
 
-''' region of interest '''
-polygon = np.array( [[[400,0],[1500,0],[1500,500], [400,500]]], dtype=np.int32 )
-
-def region_of_interest(img , polygon=polygon):
-
-    '''
-    return region of interest based on a polygon of pixels
-    '''
-
-    mask = np.zeros_like(img)
-    cv2.fillPoly(mask, polygon, 255)
-    masked_image = cv2.bitwise_and(img, mask)
-
-    return masked_image
-
-
-
-
-
+    return mask
 
